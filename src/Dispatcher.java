@@ -6,6 +6,7 @@ public class Dispatcher{
 	static protected Set<ClientHandler> activeClients = new HashSet<ClientHandler>();
 	public static void main(String[] args){
 		try{
+			// It just initialize the two server that will handle sink and source request and pass them to the two correspondant thread
 			ServerSocket sourceServer = new ServerSocket(7007);
 			ServerSocket sinkServer = new ServerSocket(7008);
 			Source source = new Source(sourceServer);
@@ -28,6 +29,7 @@ class Source extends Thread {
 	public void run(){
 	try{
 		while (true){
+			//It accept the connection, it pass it to a handler tread and with the variable true it says that he's a source process
 			Socket in = server.accept();
 			ClientHandler client = new ClientHandler(in, true);
 			client.start();
@@ -47,6 +49,7 @@ class Sink extends Thread {
 	public void run(){
 	try{
 		while (true){
+			//Like in source thread (they are almost the same) just set the boolean variable to false (cause it is sink and not source) and it add a reference to this connection to a set that contains all the references to sink processes
 			Socket in = server.accept();
 			ClientHandler sink = new ClientHandler(in, false);
 			Dispatcher.activeClients.add(sink);
@@ -63,7 +66,7 @@ class ClientHandler extends Thread{
 	protected BufferedReader in;
 	protected PrintWriter out;
 	protected boolean isSource;
-
+	
 	public synchronized void sendMessage(String msg){
 		if (out != null){
 			out.println(msg);
@@ -91,15 +94,18 @@ class ClientHandler extends Thread{
 			sendMessage("Write close to exit."); 
 			try{
 				while (true){
+					//it reads a string from the process
 					String str = in.readLine(); 
 					if (str == null){
 						break;
 					}
 					else{
+						//if the string is "close" he closes the connection with this thread
 						if (str.trim().equals("close")){
 							break; 
 						} 
 						else{
+							//if the process is a source (boolean variable isSource setted true) it send the message received to all the process contained in the sink set
 							if(isSource){
 								Iterator<ClientHandler> iter = Dispatcher.activeClients.iterator();
 								while (iter.hasNext()){

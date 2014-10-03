@@ -49,7 +49,9 @@ class Sink extends Thread {
 	public void run(){
 	try{
 		while (true){
-			//Like in source thread (they are almost the same) just set the boolean variable to false (cause it is sink and not source) and it add a reference to this connection to a set that contains all the references to sink processes
+			//Like in source thread (they are almost the same) just set the boolean variable to false 
+			//(cause it is sink and not source) and it add a reference to this connection to a set 
+			//that contains all the references to sink processes
 			Socket in = server.accept();
 			ClientHandler sink = new ClientHandler(in, false);
 			Dispatcher.activeClients.add(sink);
@@ -105,7 +107,8 @@ class ClientHandler extends Thread{
 							break; 
 						} 
 						else{
-							//if the process is a source (boolean variable isSource setted true) it send the message received to all the process contained in the sink set
+							//if the process is a source (boolean variable isSource setted true) it send the message received 
+							//to all the process contained in the sink set
 							if(isSource){
 								Iterator<ClientHandler> iter = Dispatcher.activeClients.iterator();
 								while (iter.hasNext()){

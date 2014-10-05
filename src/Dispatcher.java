@@ -54,7 +54,7 @@ class Sink extends Thread {
 			//that contains all the references to sink processes
 			Socket in = server.accept();
 			ClientHandler sink = new ClientHandler(in, false);
-			Dispatcher.activeClients.add(sink);
+			Src.activeClients.add(sink);
 			sink.start();
 		}
 	} catch (IOException e){
@@ -110,7 +110,8 @@ class ClientHandler extends Thread{
 							//if the process is a source (boolean variable isSource setted true) it send the message received 
 							//to all the process contained in the sink set
 							if(isSource){
-								Iterator<ClientHandler> iter = Dispatcher.activeClients.iterator();
+								System.out.println(str);
+								Iterator<ClientHandler> iter = Src.activeClients.iterator();
 								while (iter.hasNext()){
 									ClientHandler t = iter.next();
 									if (t != this) t.sendMessage(str);
@@ -121,7 +122,7 @@ class ClientHandler extends Thread{
 				}
 			socket.close();
 			if(!isSource){
-			Dispatcher.activeClients.remove(this);
+			Src.activeClients.remove(this);
 			}
 	} 
 			catch (IOException e){

@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-public class RightDispatcher{
+public class Dispatcher{
 	static protected Set<ClientHandler> activeClients = new HashSet<ClientHandler>();
 	public static void main(String[] args){
 		try{

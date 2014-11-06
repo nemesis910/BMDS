@@ -5,8 +5,7 @@ import java.io.*;
 public class PutClient {
 
 	private static DatagramSocket destinationSocket=null;
-	private static int port;
-	
+	private static Message message;
 
 	public static void main(String[] args) throws IOException {
 		
@@ -15,14 +14,13 @@ public class PutClient {
 			System.out.println("Please input the hostname and port to which to connect + the message you want to send");
 			return;
 		}
-		
-			//create a DatagramSocket to send it
-			destinationSocket = new DatagramSocket();
-			
+				
 			//should we set the hostname to localhost??
 			InetAddress address = InetAddress.getByName(args[0]);
-			port=Integer.parseInt(args[1]);
+			int port=Integer.parseInt(args[1]);
 			
+			//create a DatagramSocket to send it
+			destinationSocket = new DatagramSocket();
 			
 			//we create a buffer in order to send a message
 			//Message implements Serializable to be transform in an array of bytes

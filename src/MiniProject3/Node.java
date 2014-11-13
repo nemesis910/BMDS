@@ -9,10 +9,9 @@ public class Node {
 	int port;
 	InetAddress neighborAddress;
 	int neighborPort;
-	Set<Socket> addressTable;
+	static Set<SocketAddress> addressTable;
 	Set<Resource> resourceTable;
 	DatagramSocket socket;
-	
 	
 	
 	public Node(int port, String neighborAddress, int neighborPort){
@@ -49,7 +48,7 @@ public class Node {
 		}
 	}
 	
-	public void addNeighbor(Socket neighborSocket){
+	public void addNeighbor(SocketAddress neighborSocket){
 		addressTable.add(neighborSocket);
 	}
 	
@@ -68,32 +67,18 @@ public class Node {
 		return found;
 	}
 	
-	public void sendResource(int id, Socket destinationSocket){
+	public void sendResource(int id, int destinationPort, InetAddress destinationAddress){
 		DatagramPacket packet;
 		Iterator<Resource> iter = resourceTable.iterator();
 		while(iter.hasNext()){
 			Resource tmp = iter.next();
 			if(tmp.getId()==id){
 				try{
-			      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			      ObjectOutputStream oos = new ObjectOutputStream(baos);
-			      oos.writeObject(tmp);
-			      oos.flush();
-			      // get the byte array of the object
-			      byte[] buf= baos.toByteArray();
+			      Message message = new Message(Type.GET, tmp);
+			      byte[] buff = new byte[512]; // or max of a UDP Package
+				  buff = serialize(message);
 				
-			      int number = buf.length;;
-			      byte[] data = new byte[4];
-
-			      // int -> byte[]
-			      for (int i = 0; i < 4; ++i) {
-			          int shift = i << 3; // i * 8
-			          data[3-i] = (byte)((number & (0xff << shift)) >>> shift);
-			      }
-				
-				packet = new DatagramPacket(data, 4, destinationSocket.getInetAddress(), destinationSocket.getPort());
-				socket.send(packet);
-				packet = new DatagramPacket(buf, buf.length, destinationSocket.getInetAddress(), destinationSocket.getPort());
+				packet = new DatagramPacket(buff, buff.length, destinationAddress, destinationPort);
 				socket.send(packet);
 				}
 				catch(IOException e){
@@ -109,7 +94,6 @@ public class Node {
 	
 		System.out.println("presenting....");
 		
-			
 			Message message = new Message(Type.PRESENTATION, port);
 			byte[] buff = new byte[512]; // or max of a UDP Package
 			buff = serialize(message);
@@ -158,6 +142,24 @@ public class Node {
 				System.out.println(message);
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
+			}
+			
+			if(message.getType()==Type.PUT){
+				node.addResource((Resource)message.content);
+			}
+			if(message.getType()==Type.GET){
+				if(node.lookupResource((Integer)message.content)){
+					node.sendResource((Integer)message.content, packet.getPort(), packet.getAddress());
+				}
+				else{
+					for(SocketAddress s:addressTable){
+						//s.sendGet((Integer)message.content, s.getAddress(), s.getPort());
+					}
+				}
+			}
+			if(message.getType()==Type.PRESENTATION){
+				node.addNeighbor(packet.getSocketAddress());
+	
 			}
 			
 		}

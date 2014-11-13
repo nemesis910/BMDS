@@ -13,5 +13,9 @@ public class Message implements java.io.Serializable {
 		this.type=type;
 		this.content=content;
 	}
+	
+	public String toString() {
+		return content.toString();
+	}
 }
 

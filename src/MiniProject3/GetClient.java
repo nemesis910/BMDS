@@ -1,5 +1,4 @@
 package MiniProject3;
-
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -25,48 +24,40 @@ public class GetClient {
 			return;
 		}
 
-		// create a DatagramSocket to sned
-		destinationSocket = new DatagramSocket();
-
-		// socket
+		// get the stuff from the command line
 		InetAddress address = InetAddress.getByName(args[0]);
 		int port = Integer.parseInt(args[1]);
+		int id = Integer.parseInt(args[2]);
 
-		// send the request for a specific message
-		value = Integer.parseInt(args[2]);
-		byte[] buff = new byte[512];
+		// create a DatagramSocket to send
+		destinationSocket = new DatagramSocket();
 
-		// convert the value into byte array
-		ByteBuffer b = ByteBuffer.allocate(4);
-		buff = b.putInt(value).array();
-
+		
 		try {
-			// getRequest
-			DatagramPacket packet = new DatagramPacket(buff, buff.length,
-					address, port);
-			destinationSocket.send(packet);
-			System.out.println("Request sent to ");
 
-			// wait for response??
-			packet = new DatagramPacket(buff, buff.length);
+			// sendGet
+			Message.sendGet(id, address, port);
+			// sleep 3 seconds
+			/*try {
+				Thread.sleep(3000); // 3 seconds
+				System.out.println("wait for 3 seconds");
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+*/
+			// receive the message
+			byte[] buff = new byte[512];
+			DatagramPacket packet = new DatagramPacket(buff, buff.length);
 			destinationSocket.receive(packet);
 			System.out.println("Message received");
 
-			Message message = deserialize(buff);
-			System.out.println(message.content);
+			Message message = Message.deserialize(buff);
+
+			System.out.println("It's done!");
 
 		} finally {
 			destinationSocket.close();
 		}
-	}
-
-	public static Message deserialize(byte[] bytes) throws IOException,
-			ClassNotFoundException {
-		ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-		ObjectInputStream o = new ObjectInputStream(b);
-		return (Message) o.readObject();
-
-		// I hope this will work
 	}
 
 }

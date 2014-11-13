@@ -7,49 +7,55 @@ public class PutClient {
 
 	private static DatagramSocket destinationSocket = null;
 	private static Message message;
+	private static Resource res;
 
 	public static void main(String[] args) throws IOException {
 
-		if (args.length != 3) {
+		if (args.length != 4) {
 			System.out
-					.println("Please input the hostname and port to which to connect + the message you want to send");
+					.println("Please input the hostname and port to which to connect + the identifier and the message you want to send");
+			if (args[0] == "")
+				System.out.println("Please input a hostname");
+			if (args[1] == "")
+				System.out.println("Please input the port on which to connect");
+			if (args[2] == "")
+				System.out.println("Please input the identifier");
+			if (args[3] == "")
+				System.out.println("Please input the message");
+
 			return;
 		}
 
-		// should we set the hostname to localhost??
+		// Getting all the stuff from the command line
 		InetAddress address = InetAddress.getByName(args[0]);
 		int port = Integer.parseInt(args[1]);
+		int id = Integer.parseInt(args[2]);
+		String resourceMessage = args[3];
 
 		// create a DatagramSocket to send it
 		destinationSocket = new DatagramSocket();
 
-		// we create a buffer in order to send a message
-		// Message implements Serializable to be transform in an array of bytes
-		Message message = new Message(Type.PUT, args[2]);
-		byte[] buff = new byte[512]; // or max of a UDP Package
-		buff = serialize(message);
-
 		try {
+
+			// create the buffer
+			byte[] buff = new byte[512];
+
+			// create the resource and the message
+			res = new Resource(id, resourceMessage);
+			message = new Message(Type.PUT, res);
+			buff = Message.serialize(message);
 
 			DatagramPacket packet = new DatagramPacket(buff, buff.length,
 					address, port);
 			destinationSocket.send(packet);
 
-			System.out.println(message.content);
-			System.out.println("SENT!");
+			System.out.println("Message SENT!");
 
 		} finally {
 			destinationSocket.close();
 
 		}
 
-	}
-
-	private static byte[] serialize(Message message) throws IOException {
-		ByteArrayOutputStream b = new ByteArrayOutputStream();
-		ObjectOutputStream o = new ObjectOutputStream(b);
-		o.writeObject(message);
-		return b.toByteArray();
 	}
 
 }

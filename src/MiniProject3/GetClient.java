@@ -32,7 +32,7 @@ public class GetClient {
 		//DEBUG STUFF
 		//InetAddress address = InetAddress.getByName("localhost");
 		//int port = 7010;
-		//int id = 1;
+		//int id = 2;
 		
 		// create a DatagramSocket to send
 		destinationSocket = new DatagramSocket();

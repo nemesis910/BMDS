@@ -11,7 +11,7 @@ public class PutClient {
 
 	public static void main(String[] args) throws IOException {
 
-		if (args.length == 4) {
+		if (args.length != 4) {
 			System.out
 					.println("Please input the hostname and port to which to connect + the identifier and the message you want to send");
 			if (args[0] == "")

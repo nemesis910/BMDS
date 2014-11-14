@@ -25,13 +25,19 @@ public class PutClient {
 
 			return;
 		}
-
+		
 		// Getting all the stuff from the command line
-		InetAddress address = InetAddress.getByName(args[0]);
+	InetAddress address = InetAddress.getByName(args[0]);
 		int port = Integer.parseInt(args[1]);
 		int id = Integer.parseInt(args[2]);
 		String resourceMessage = args[3];
-
+		
+			//DEBUG STUFF
+			//InetAddress address = InetAddress.getByName("localhost");
+			//int port = 7007;
+			//int id = 1;
+			//String resourceMessage = "FUNZIONA!";
+		
 		// create a DatagramSocket to send it
 		destinationSocket = new DatagramSocket();
 
@@ -48,9 +54,7 @@ public class PutClient {
 			DatagramPacket packet = new DatagramPacket(buff, buff.length,
 					address, port);
 			destinationSocket.send(packet);
-
-			System.out.println("Message SENT!");
-
+			
 		} finally {
 			destinationSocket.close();
 

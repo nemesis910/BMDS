@@ -10,7 +10,7 @@ public class Node {
 	InetAddress neighborAddress;
 	int neighborPort;
 	static Set<SocketAddress> addressTable;
-	Set<Resource> resourceTable;
+	static Set<Resource> resourceTable;
 	DatagramSocket socket;
 	
 	
@@ -32,7 +32,7 @@ public class Node {
 		try {
 			presentHimself();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
 		}
 	}
@@ -90,6 +90,10 @@ public class Node {
 		}
 	}
 	
+	public void forwardGet(int id, InetAddress address, int port) throws IOException{
+		
+	}
+	
 	public void presentHimself() throws IOException{
 	
 		System.out.println("presenting....");
@@ -118,11 +122,17 @@ public class Node {
 	public static void main(String[] args) {
 		
 		Node node;
+		resourceTable = new HashSet<Resource>();
+		addressTable = new HashSet<SocketAddress>();
+		
 		if (args.length == 1) {
 			node = new Node(Integer.parseInt(args[0]));
-		} else {
+		} 
+		if (args.length == 3){
 			node = new Node(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]));
 		}
+		else 
+			node = new Node(7007);
 		while(true) {
 			// to receive a message
             int MESSAGE_LEN = 1000;
@@ -136,7 +146,7 @@ public class Node {
 				e.printStackTrace();
 			}
 			System.out.println("Message received");
-			Message message = null;
+			Message message = new Message();
 			try {
 			    message = deserialize(packet.getData());
 				System.out.println(message);
@@ -146,14 +156,47 @@ public class Node {
 			
 			if(message.getType()==Type.PUT){
 				node.addResource((Resource)message.content);
+				System.out.println("Resource saved, message was " + ((Resource) message.content).getElement() );
 			}
 			if(message.getType()==Type.GET){
 				if(node.lookupResource((Integer)message.content)){
+					System.out.print("FOUND");
 					node.sendResource((Integer)message.content, packet.getPort(), packet.getAddress());
 				}
 				else{
 					for(SocketAddress s:addressTable){
-						//s.sendGet((Integer)message.content, s.getAddress(), s.getPort());
+						InetSocketAddress receiver = (InetSocketAddress)s;
+						Message forward = new Message(Type.GETFORWARD, new GetForward((Integer)message.content, packet.getAddress(), packet.getPort()));
+						byte[] buff = new byte[512];
+						try{
+						buff = serialize(forward);
+						DatagramPacket forwardPacket = new DatagramPacket(buff,buff.length, receiver.getAddress(), receiver.getPort());
+						node.socket.send(forwardPacket);
+						}
+						catch(Exception e){
+							
+						}
+					}
+				}
+			}
+			
+			if(message.getType()==Type.GETFORWARD){
+				if(node.lookupResource(((GetForward) message.content).getId())){
+					node.sendResource(((GetForward) message.content).getId(), ((GetForward) message.content).getPort(), ((GetForward) message.content).getAddress());
+				}
+				else{
+					for(SocketAddress s:addressTable){
+						InetSocketAddress receiver = (InetSocketAddress)s;
+						Message forward = new Message(Type.GETFORWARD, new GetForward((Integer)message.content, ((GetForward) message.content).getAddress(), ((GetForward) message.content).getPort()));
+						byte[] buff = new byte[512];
+						try{
+						buff = serialize(forward);
+						DatagramPacket forwardPacket = new DatagramPacket(buff,buff.length, receiver.getAddress(), receiver.getPort());
+						node.socket.send(forwardPacket);
+						}
+						catch(Exception e){
+							
+						}
 					}
 				}
 			}

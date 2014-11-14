@@ -6,8 +6,8 @@ public class Resource implements java.io.Serializable {
 	String element;
 	
 	public Resource(int id, String element){
-		id = this.id;
-		element = this.element;
+		this.id = id;
+		this.element = element;
 	}
 	
 	public int getId() {

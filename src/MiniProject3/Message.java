@@ -8,7 +8,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-enum Type { PUT, GET, PRESENTATION }
+enum Type { PUT, GET, PRESENTATION, GETFORWARD }
 
 public class Message implements java.io.Serializable {
 	Type type;
@@ -19,6 +19,10 @@ public class Message implements java.io.Serializable {
 		this.content = content;
 	}
 
+	public Message() {
+		
+	}
+	
 	public Type getType() {
 		return type;
 	}

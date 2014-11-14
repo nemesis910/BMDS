@@ -11,7 +11,7 @@ public class Node {
 	int neighborPort;
 	static Set<SocketAddress> addressTable;
 	static Set<Resource> resourceTable;
-	DatagramSocket socket;
+	static DatagramSocket socket;
 	
 	
 	public Node(int port, String neighborAddress, int neighborPort){
@@ -47,6 +47,38 @@ public class Node {
 		catch(IOException e){
 		}
 	}
+	
+public Node(){
+		
+	Scanner in = new Scanner(System.in);
+	
+		
+	System.out.println("Insert port: ");
+		this.port = in.nextInt();
+		System.out.println("Insert port neighbor: ");
+		this.neighborPort = in.nextInt();
+		
+		System.out.println("Insert address neighbor: ");
+		try{
+		this.neighborAddress = InetAddress.getByName(in.next());
+		}
+		
+		catch(Exception e){
+			
+		}
+		try{
+			socket = new DatagramSocket(port);
+		}
+		catch(IOException e){
+		}
+		try {
+			presentHimself();
+		} catch (IOException e) {
+		
+			e.printStackTrace();
+		}
+	}
+	
 	
 	public void addNeighbor(SocketAddress neighborSocket){
 		addressTable.add(neighborSocket);
@@ -109,6 +141,7 @@ public class Node {
 				socket.send(packet);
 				
 				System.out.println("PRESENTED");
+				addressTable.add(new InetSocketAddress(neighborAddress, neighborPort));
 
 			} finally {
 
@@ -132,7 +165,7 @@ public class Node {
 			node = new Node(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]));
 		}
 		else 
-			node = new Node(7007);
+			node = new Node();
 		while(true) {
 			// to receive a message
             int MESSAGE_LEN = 1000;
@@ -149,7 +182,7 @@ public class Node {
 			Message message = new Message();
 			try {
 			    message = deserialize(packet.getData());
-				System.out.println(message);
+				System.out.println(message.type);
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
 			}
@@ -164,17 +197,19 @@ public class Node {
 					node.sendResource((Integer)message.content, packet.getPort(), packet.getAddress());
 				}
 				else{
-					for(SocketAddress s:addressTable){
-						InetSocketAddress receiver = (InetSocketAddress)s;
+					Iterator<SocketAddress> iter = addressTable.iterator();
+					while(iter.hasNext()){
+						InetSocketAddress receiver = (InetSocketAddress)iter.next();
 						Message forward = new Message(Type.GETFORWARD, new GetForward((Integer)message.content, packet.getAddress(), packet.getPort()));
 						byte[] buff = new byte[512];
 						try{
 						buff = serialize(forward);
 						DatagramPacket forwardPacket = new DatagramPacket(buff,buff.length, receiver.getAddress(), receiver.getPort());
-						node.socket.send(forwardPacket);
+						socket.send(forwardPacket);
+						System.out.println("sent forward");
 						}
 						catch(Exception e){
-							
+							System.out.println(e);
 						}
 					}
 				}
@@ -185,9 +220,11 @@ public class Node {
 					node.sendResource(((GetForward) message.content).getId(), ((GetForward) message.content).getPort(), ((GetForward) message.content).getAddress());
 				}
 				else{
-					for(SocketAddress s:addressTable){
-						InetSocketAddress receiver = (InetSocketAddress)s;
-						Message forward = new Message(Type.GETFORWARD, new GetForward((Integer)message.content, ((GetForward) message.content).getAddress(), ((GetForward) message.content).getPort()));
+					Iterator<SocketAddress> iter = addressTable.iterator();
+					while(iter.hasNext()){
+						
+						InetSocketAddress receiver = (InetSocketAddress)iter.next();
+						Message forward = new Message(Type.GETFORWARD, new GetForward(((GetForward)message.content).getId(), ((GetForward) message.content).getAddress(), ((GetForward) message.content).getPort()));
 						byte[] buff = new byte[512];
 						try{
 						buff = serialize(forward);

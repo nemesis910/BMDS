@@ -2,7 +2,7 @@ package MiniProject3;
 
 import java.net.*;
 
-public class GetForward {
+public class GetForward implements java.io.Serializable {
 	int id;
 	int port;
 	InetAddress address;

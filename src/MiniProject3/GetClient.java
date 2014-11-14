@@ -10,7 +10,7 @@ public class GetClient {
 
 	public static void main(String[] args) throws IOException,
 			ClassNotFoundException {
-		if (args.length == 3) {
+		if (args.length != 3) {
 			System.out
 					.println("Please input the hostname and port from where you want to get the message + the identifier of the message");
 
@@ -31,7 +31,7 @@ public class GetClient {
 		
 		//DEBUG STUFF
 		//InetAddress address = InetAddress.getByName("localhost");
-		//int port = 7007;
+		//int port = 7010;
 		//int id = 1;
 		
 		// create a DatagramSocket to send

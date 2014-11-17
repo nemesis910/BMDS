@@ -12,11 +12,13 @@ public class NodeB {
 	static Set<SocketAddress> addressTable;
 	static Set<Resource> resourceTable;
 	static DatagramSocket socket;
+	static boolean redundant;
 	
 	
 	public NodeB(int port, String neighborAddress, int neighborPort){
 		this.port = port;
 		this.neighborPort = neighborPort;
+		redundant = false;
 		
 		try{
 			this.neighborAddress = InetAddress.getByName(neighborAddress);
@@ -39,7 +41,7 @@ public class NodeB {
 	
 	public NodeB(int port){
 		
-		
+		redundant = false;
 		this.port = port;
 		try{
 			socket = new DatagramSocket(port);
@@ -51,7 +53,7 @@ public class NodeB {
 public NodeB(){
 		
 	Scanner in = new Scanner(System.in);
-	
+	redundant = false;
 		
 	System.out.println("Insert port: ");
 		this.port = in.nextInt();
@@ -95,12 +97,58 @@ public NodeB(){
 				
 			}
 		addressTable.add(neighborSocket);
+		if(redundant==false){
+			Iterator<Resource> iter = resourceTable.iterator();
+			while(iter.hasNext()){
+				Resource tmp = iter.next();
+				byte[] buff = new byte[512];
+				Message message = new Message(Type.PUTREDUNDANT, tmp);
+				try{
+				buff = Message.serialize(message);
+				DatagramPacket packet = new DatagramPacket(buff, buff.length,
+						((InetSocketAddress)neighborSocket).getAddress(), ((InetSocketAddress)neighborSocket).getPort());
+				socket.send(packet);
+				}
+				catch(Exception e){
+					
+				}
+			}
 		}
+		}
+	}
+	
+	public void addResourceRedundant(Resource resource){
+		resourceTable.add(resource);
 	}
 	
 	public void addResource(Resource resource){
 		resourceTable.add(resource);
-	}
+		try {
+
+			byte[] buff = new byte[512];
+			Message message = new Message(Type.PUTREDUNDANT, resource);
+			buff = Message.serialize(message);
+			Iterator<SocketAddress> iter = addressTable.iterator();
+			if(!addressTable.isEmpty()){
+			redundant = true;
+			while(iter.hasNext()){
+				InetSocketAddress receiver = (InetSocketAddress)iter.next();
+				try{
+					DatagramPacket packet = new DatagramPacket(buff, buff.length,
+							receiver.getAddress(), receiver.getPort());
+					socket.send(packet);
+				}
+				catch(Exception e){
+					
+				}
+			}
+			}
+		}
+			catch(Exception e){
+				
+			}
+		}
+
 	
 	public boolean lookupResource(int id){
 		boolean found = false;
@@ -198,11 +246,13 @@ public NodeB(){
 		if (args.length == 1) {
 			node = new NodeB(Integer.parseInt(args[0]));
 		} 
-		if (args.length == 3){
+		else{
+			if (args.length == 3){
 			node = new NodeB(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]));
 		}
-		else 
+			else
 			node = new NodeB();
+			}
 		while(true) {
 			// to receive a message
             int MESSAGE_LEN = 1000;
@@ -226,6 +276,10 @@ public NodeB(){
 			
 			if(message.getType()==Type.PUT){
 				node.addResource((Resource)message.content);
+				System.out.println("Resource saved, message was " + ((Resource) message.content).getElement() );
+			}
+			if(message.getType()==Type.PUTREDUNDANT){
+				node.addResourceRedundant((Resource)message.content);
 				System.out.println("Resource saved, message was " + ((Resource) message.content).getElement() );
 			}
 			if(message.getType()==Type.TABLE){
@@ -256,7 +310,7 @@ public NodeB(){
 					Iterator<SocketAddress> iter = addressTable.iterator();
 					while(iter.hasNext()){
 						InetSocketAddress receiver = (InetSocketAddress)iter.next();
-						Message forward = new Message(Type.GETFORWARD, new GetForward((Integer)message.content, packet.getAddress(), packet.getPort()));
+						Message forward = new Message(Type.GETFORWARD, new GetForward((Integer)message.content, packet.getAddress(), packet.getPort(), 0));
 						byte[] buff = new byte[512];
 						try{
 						buff = serialize(forward);

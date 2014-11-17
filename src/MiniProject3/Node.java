@@ -53,7 +53,7 @@ public Node(){
 	Scanner in = new Scanner(System.in);
 	
 		
-	System.out.println("Insert port: ");
+		System.out.println("Insert port: ");
 		this.port = in.nextInt();
 		System.out.println("Insert port neighbor: ");
 		this.neighborPort = in.nextInt();
@@ -161,11 +161,13 @@ public Node(){
 		if (args.length == 1) {
 			node = new Node(Integer.parseInt(args[0]));
 		} 
-		if (args.length == 3){
+		else{
+			if (args.length == 3){
 			node = new Node(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]));
 		}
-		else 
+			else
 			node = new Node();
+			}
 		while(true) {
 			// to receive a message
             int MESSAGE_LEN = 1000;
@@ -200,7 +202,7 @@ public Node(){
 					Iterator<SocketAddress> iter = addressTable.iterator();
 					while(iter.hasNext()){
 						InetSocketAddress receiver = (InetSocketAddress)iter.next();
-						Message forward = new Message(Type.GETFORWARD, new GetForward((Integer)message.content, packet.getAddress(), packet.getPort()));
+						Message forward = new Message(Type.GETFORWARD, new GetForward((Integer)message.content, packet.getAddress(), packet.getPort(), 0));
 						byte[] buff = new byte[512];
 						try{
 						buff = serialize(forward);
@@ -220,11 +222,12 @@ public Node(){
 					node.sendResource(((GetForward) message.content).getId(), ((GetForward) message.content).getPort(), ((GetForward) message.content).getAddress());
 				}
 				else{
+					if(((GetForward) message.content).getTtl()<10){
 					Iterator<SocketAddress> iter = addressTable.iterator();
 					while(iter.hasNext()){
 						
 						InetSocketAddress receiver = (InetSocketAddress)iter.next();
-						Message forward = new Message(Type.GETFORWARD, new GetForward(((GetForward)message.content).getId(), ((GetForward) message.content).getAddress(), ((GetForward) message.content).getPort()));
+						Message forward = new Message(Type.GETFORWARD, new GetForward(((GetForward)message.content).getId(), ((GetForward) message.content).getAddress(), ((GetForward) message.content).getPort(), ((GetForward) message.content).getTtl()+1 ));
 						byte[] buff = new byte[512];
 						try{
 						buff = serialize(forward);
@@ -234,6 +237,7 @@ public Node(){
 						catch(Exception e){
 							
 						}
+					}
 					}
 				}
 			}

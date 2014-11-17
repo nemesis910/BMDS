@@ -6,11 +6,13 @@ public class GetForward implements java.io.Serializable {
 	int id;
 	int port;
 	InetAddress address;
+	int ttl;
 	
-	public GetForward(int id, InetAddress address, int port){
+	public GetForward(int id, InetAddress address, int port, int ttl){
 		this.id = id;
 		this.address = address;
 		this.port = port;
+		this.ttl = ttl;
 	}
 	
 	public int getId() {
@@ -31,5 +33,10 @@ public class GetForward implements java.io.Serializable {
 	public void setAddress(InetAddress address) {
 		this.address = address;
 	}
-	
+	public int getTtl() {
+		return ttl;
+	}
+	public void setTtl(int ttl) {
+		this.ttl = ttl;
+	}
 }

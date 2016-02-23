@@ -1,0 +1,11 @@
+<application>
+  <component name="FindRecents">
+    <findStrings>
+      <find>listview_</find>
+      <find>listview</find>
+      <find>popul</find>
+      <find>popu</find>
+      <find>setImageBitmap</find>
+    </findStrings>
+  </component>
+</application>

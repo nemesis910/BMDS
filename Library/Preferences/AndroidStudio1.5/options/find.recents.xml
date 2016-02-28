@@ -11,6 +11,7 @@
       <find>quick</find>
       <find>UserLoginTask</find>
       <find>finish</find>
+      <find>context</find>
     </findStrings>
   </component>
 </application>

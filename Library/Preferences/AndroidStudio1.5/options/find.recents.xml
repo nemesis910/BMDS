@@ -6,6 +6,11 @@
       <find>popul</find>
       <find>popu</find>
       <find>setImageBitmap</find>
+      <find>registeri</find>
+      <find>registering</find>
+      <find>quick</find>
+      <find>UserLoginTask</find>
+      <find>finish</find>
     </findStrings>
   </component>
 </application>

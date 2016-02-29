@@ -12,6 +12,8 @@
       <find>UserLoginTask</find>
       <find>finish</find>
       <find>context</find>
+      <find>setupActionBar();</find>
+      <find>setupActionBar</find>
     </findStrings>
   </component>
 </application>
